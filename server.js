@@ -13,7 +13,8 @@ if (fastify.websocketServer === undefined) {
   })
 }
 fastify.register(require('fastify-cors'), {
-  origin: ['http://localhost:3000/'],
+  origin: ['http://localhost:3000'],
+  credentials: true,
 })
 // Declare a route
 fastify.register(mainRoute)
