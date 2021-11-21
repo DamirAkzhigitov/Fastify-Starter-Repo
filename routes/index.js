@@ -1,56 +1,52 @@
-const getUniqueID = () => {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1)
-  }
-  return s4() + s4() + '-' + s4()
-}
+const {
+  roomListProxy,
+  addUserToRoom,
+  addNewRoom,
+  onRoomChanged,
+} = require('../state/room/index')
+const { getUser, getUniqueID } = require('../utils/helpers')
 
-const roomList = []
 const users = {}
 
-const roomListProxy = new Proxy(roomList, {
-  set: (target, key, value) => {
-    console.log(`${key} set to ${value}`)
-    target[key] = value
-    return true
-  },
-})
-
 async function routes(fastify, options) {
-  fastify.get(
-    '/',
-    { websocket: true },
-    (connection /* SocketStream */, req /* FastifyRequest */) => {
-      connection.id = getUniqueID()
+  fastify.get('/', { websocket: true }, (connection) => {
+    onRoomChanged(() => {
+      console.log('onRoomChanged')
+      connection.socket.send(JSON.stringify(roomListProxy))
+    })
+  })
 
-      if (!users[connection.id])
-        users[connection.id] = { userId: connection.id }
+  fastify.get('/auth', (req, reply) => {
+    const id = getUniqueID()
 
-      connection.socket.on('message', (message) => {
-        console.log('message: ', message.toString())
-        connection.socket.send(connection.id)
-      })
-    }
-  )
+    if (!users[id]) users[id] = { userId: id }
+
+    reply.send(id)
+  })
 
   fastify.get('/newRoom', (req, reply) => {
-    const newRoom = {
-      id: getUniqueID(),
-    }
-
-    roomListProxy.push(newRoom)
+    const newRoom = addNewRoom(getUniqueID())
 
     reply.send(newRoom)
   })
 
-  fastify.get('/enter', (req, reply) => {})
+  fastify.post('/enter', (req, reply) => {
+    const user = getUser(req.headers.cookie)
+
+    const room = JSON.parse(req.body)
+
+    const result = addUserToRoom(room.id, user)
+
+    if (result.error) {
+      reply.send(result)
+      return
+    }
+
+    return reply.send(result)
+  })
 
   fastify.get('/rooms', (req, reply) => {
-    console.log(req.headers.cookie)
-
-    reply.send(roomList)
+    reply.send(roomListProxy)
   })
 }
 
