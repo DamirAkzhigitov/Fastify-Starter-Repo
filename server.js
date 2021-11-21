@@ -13,7 +13,7 @@ if (fastify.websocketServer === undefined) {
   })
 }
 fastify.register(require('fastify-cors'), {
-  origin: ['http://localhost:3000'],
+  origin: ['http://localhost:3000', 'http://192.168.1.68:3000'],
   credentials: true,
 })
 // Declare a route
@@ -21,7 +21,7 @@ fastify.register(mainRoute)
 // Run the server!
 const start = async () => {
   try {
-    await fastify.listen(8080)
+    await fastify.listen(8080, '192.168.1.68')
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)

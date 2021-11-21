@@ -12,7 +12,8 @@
   "dependencies": {
     "fastify": "^3.24.0",
     "fastify-cors": "^6.0.2",
-    "fastify-websocket": "^4.0.0"
+    "fastify-websocket": "^4.0.0",
+    "http-errors": "^1.8.1"
   },
   "devDependencies": {
     "prettier": "^2.4.1"

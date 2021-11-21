@@ -60,6 +60,8 @@ const addUserToRoom = (roomId, user) => {
       if (isAlreadyInRoom) {
         return { error: true, text: 'User already in room' }
       } else {
+        console.log('push user: ', user)
+
         targetRoom.members.push(user)
 
         onRoomChanged()

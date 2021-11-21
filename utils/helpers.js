@@ -7,6 +7,10 @@ const getUniqueID = () => {
   return s4() + s4() + '-' + s4()
 }
 
-const getUser = (cookie) => (cookie ? cookie.split('=')[1] : null)
+const getUser = (cookie) => {
+  console.log('cookie: ', cookie)
+
+  return cookie ? cookie.split('=')[1] : null
+}
 
 module.exports = { getUser, getUniqueID }
