@@ -1,18 +1,21 @@
 'use strict'
 // Require the framework and instantiate it
-const Fastify = require('fastify')
-const mainRoute = require('./routes/index')
+import Fastify from 'fastify'
+import FastifyCors from 'fastify-cors'
+import FastifyWebsockets from 'fastify-websocket'
+
+import mainRoute from './src/routes/index'
 
 const fastify = Fastify({ logger: true })
 
 if (fastify.websocketServer === undefined) {
-  fastify.register(require('fastify-websocket'), {
+  fastify.register(FastifyWebsockets, {
     options: {
       maxPayload: 1048576,
     },
   })
 }
-fastify.register(require('fastify-cors'), {
+fastify.register(FastifyCors, {
   origin: ['http://localhost:3000', 'http://192.168.1.68:3000'],
   credentials: true,
 })
