@@ -5,6 +5,7 @@ import FastifyCors from 'fastify-cors'
 import FastifyWebsockets from 'fastify-websocket'
 
 import mainRoute from './src/routes/index'
+import gameRoute from './src/routes/Game/index'
 
 const fastify = Fastify({ logger: true })
 
@@ -21,6 +22,7 @@ fastify.register(FastifyCors, {
 })
 // Declare a route
 fastify.register(mainRoute)
+fastify.register(gameRoute)
 // Run the server!
 const start = async () => {
   try {
