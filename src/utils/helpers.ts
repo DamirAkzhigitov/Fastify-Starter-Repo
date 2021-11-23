@@ -1,3 +1,5 @@
+import { IncomingHttpHeaders } from 'http2'
+
 const getUniqueID = () => {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -7,10 +9,8 @@ const getUniqueID = () => {
   return s4() + s4() + '-' + s4()
 }
 
-const getUser = (cookie: string | null | undefined) => {
-  console.log('cookie: ', cookie)
-
-  return cookie ? cookie.split('=')[1] : null
+const getUser = (headers: IncomingHttpHeaders): string | null => {
+  return headers.authorization || null
 }
 
 export { getUser, getUniqueID }

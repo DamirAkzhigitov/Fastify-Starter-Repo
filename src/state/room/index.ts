@@ -1,13 +1,7 @@
-import { CallbackFunctionVariadic, RoomItem } from 'src/models'
+import { CallbackFunctionVariadic, RoomItem, UserItem } from 'src/models'
 
-const roomList: RoomItem[] = [
-  {
-    id: '0',
-    members: [],
-    max: 6,
-    name: `MyRoom0`,
-  },
-]
+const roomList: RoomItem[] = []
+const users: UserItem[] = []
 
 let cachedFn: CallbackFunctionVariadic | null = null
 
@@ -51,27 +45,28 @@ const roomListProxy = new Proxy(roomList, {
     }
     onRoomChanged(null)
 
-    console.log('roomChanged')
-
     return (obj[prop] = value)
   },
 })
 
-const addUserToRoom = (roomId: string, user: string) => {
+const addUserToRoom = (roomId: string, userId: string) => {
   const targetRoom: RoomItem = roomListProxy[roomId]
+  const user = users.find((userItem) => userItem.id === userId)
 
-  if (targetRoom) {
+  if (targetRoom && user) {
     if (targetRoom.members.length < targetRoom.max) {
       const isAlreadyInRoom = targetRoom.members.find(
-        (member) => member.id === user
+        (member) => member.id === userId
       )
 
-      if (isAlreadyInRoom) {
+      if (isAlreadyInRoom || !!user.roomId) {
         return { error: true, text: 'User already in room' }
       } else {
         const isCreator = targetRoom.members.length === 0
 
-        targetRoom.members.push({ id: user, creator: isCreator, vip: false })
+        targetRoom.members.push({ id: userId, creator: isCreator, vip: false })
+
+        user.roomId = roomId
 
         onRoomChanged(null)
 
@@ -84,11 +79,7 @@ const addUserToRoom = (roomId: string, user: string) => {
 }
 
 const addNewRoom = (id: string) => {
-  console.log('roomListProxy: ', roomListProxy)
-
   const numberOfRooms = roomListProxy.length
-
-  console.log('numberOfRooms: ', numberOfRooms)
 
   const newRoom: RoomItem = {
     id,
@@ -97,11 +88,9 @@ const addNewRoom = (id: string) => {
     name: `MyRoom${numberOfRooms}`,
   }
 
-  console.log('newRoom: ', newRoom)
-
   roomListProxy.push(newRoom)
 
   return newRoom
 }
 
-export { roomListProxy, addUserToRoom, addNewRoom, onRoomChanged }
+export { roomListProxy, users, addUserToRoom, addNewRoom, onRoomChanged }

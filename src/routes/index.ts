@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import {
   roomListProxy,
+  users,
   addUserToRoom,
   addNewRoom,
   onRoomChanged,
@@ -9,8 +10,6 @@ import { getUser, getUniqueID } from '../utils/helpers'
 import CreateError from 'http-errors'
 
 const userDidNotProvided = CreateError(500, 'User id not set')
-
-const users = []
 
 async function routes(fastify: FastifyInstance) {
   onRoomChanged(() => {
@@ -28,11 +27,15 @@ async function routes(fastify: FastifyInstance) {
   })
 
   fastify.get('/auth', (req, reply) => {
-    const id = getUniqueID()
+    const id: string = getUser(req.headers) || getUniqueID()
+    const storedUser = users.find((user) => user.id === id)
 
-    users.push({
-      id,
-    })
+    if (!storedUser) {
+      users.push({
+        id,
+        roomId: null,
+      })
+    }
 
     reply.send(id)
   })
@@ -46,9 +49,9 @@ async function routes(fastify: FastifyInstance) {
   const options = {}
 
   fastify.post('/enter', options, (req, reply) => {
-    const user = getUser(req.headers.cookie)
+    const getUserId = getUser(req.headers)
 
-    if (!user) {
+    if (!getUserId) {
       reply.send(userDidNotProvided)
 
       return
@@ -57,9 +60,7 @@ async function routes(fastify: FastifyInstance) {
     if (typeof req.body === 'string') {
       const room = req.body ? JSON.parse(req.body) : null
 
-      console.log('room: ', room)
-
-      const result = addUserToRoom(room.id, user)
+      const result = addUserToRoom(room.id, getUserId)
 
       if (result.error) {
         reply.send(result)
