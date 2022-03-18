@@ -5,6 +5,14 @@ const users: UserItem[] = []
 
 let cachedFn: CallbackFunctionVariadic | null = null
 
+const getUserList = () => {
+  return users
+}
+
+const setUserToList = (user: UserItem) => {
+  users.push(user)
+}
+
 const onRoomChanged = (fn: CallbackFunctionVariadic | null) => {
   if (!fn) {
     if (cachedFn) {
@@ -51,7 +59,18 @@ const roomListProxy = new Proxy(roomList, {
 
 const addUserToRoom = (roomId: string, userId: string) => {
   const targetRoom: RoomItem = roomListProxy[roomId]
+
+  console.log('targetRoom:', targetRoom)
+
+  console.log('list users: ',users)
+
   const user = users.find((userItem) => userItem.id === userId)
+
+  if (!user) {
+    console.info('addUserToRoom, cant find user')
+  }
+
+  console.log('user:' , user)
 
   if (targetRoom && user) {
     if (targetRoom.members.length < targetRoom.max) {
@@ -93,4 +112,4 @@ const addNewRoom = (id: string) => {
   return newRoom
 }
 
-export { roomListProxy, users, addUserToRoom, addNewRoom, onRoomChanged }
+export { roomListProxy, users, addUserToRoom, addNewRoom, onRoomChanged, getUserList, setUserToList }

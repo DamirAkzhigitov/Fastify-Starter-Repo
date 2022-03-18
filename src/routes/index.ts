@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import {
   roomListProxy,
-  users,
+  getUserList,
+  setUserToList,
   addUserToRoom,
   addNewRoom,
   onRoomChanged,
@@ -28,10 +29,10 @@ async function routes(fastify: FastifyInstance) {
 
   fastify.get('/auth', (req, reply) => {
     const id: string = getUser(req.headers) || getUniqueID()
-    const storedUser = users.find((user) => user.id === id)
+    const storedUser = getUserList().find((user) => user.id === id)
 
     if (!storedUser) {
-      users.push({
+      setUserToList({
         id,
         roomId: null,
       })
@@ -51,24 +52,25 @@ async function routes(fastify: FastifyInstance) {
   fastify.post('/enter', options, (req, reply) => {
     const getUserId = getUser(req.headers)
 
+    const room = req.body as { id: string }
+
     if (!getUserId) {
       reply.send(userDidNotProvided)
 
       return
     }
 
-    if (typeof req.body === 'string') {
-      const room = req.body ? JSON.parse(req.body) : null
+    console.log('room: ', room)
+    console.log('user id: ', getUserId)
+    const result = addUserToRoom(room.id, getUserId)
 
-      const result = addUserToRoom(room.id, getUserId)
-
-      if (result.error) {
-        reply.send(result)
-        return
-      }
-
+    if (result.error) {
       reply.send(result)
+      return
     }
+
+    reply.send(result)
+    // }
     return
   })
 
