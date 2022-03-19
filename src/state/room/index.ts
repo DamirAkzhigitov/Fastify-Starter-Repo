@@ -14,12 +14,17 @@ const setUserToList = (user: UserItem) => {
 }
 
 const onRoomChanged = (fn: CallbackFunctionVariadic | null) => {
+  // console.log('onRoomChanged:  fn = ', fn)
   if (!fn) {
+    // console.log('without fn')
     if (cachedFn) {
+      // console.log('cachedFn:', cachedFn)
+      // console.log('run cached fn')
       cachedFn()
     }
     return
   }
+  // console.log('set cached fn ')
   cachedFn = fn
 }
 
@@ -47,6 +52,7 @@ const roomListProxy = new Proxy(roomList, {
   },
   set(obj, prop, value) {
     if (prop !== 'length') {
+      // console.log('prop: ', prop)
       /*
        * Important and interesting things done here
        */
@@ -60,9 +66,9 @@ const roomListProxy = new Proxy(roomList, {
 const addUserToRoom = (roomId: string, userId: string) => {
   const targetRoom: RoomItem = roomListProxy[roomId]
 
-  console.log('targetRoom:', targetRoom)
-
-  console.log('list users: ',users)
+  // console.log('targetRoom:', targetRoom)
+  //
+  // console.log('list users: ', users)
 
   const user = users.find((userItem) => userItem.id === userId)
 
@@ -70,7 +76,7 @@ const addUserToRoom = (roomId: string, userId: string) => {
     console.info('addUserToRoom, cant find user')
   }
 
-  console.log('user:' , user)
+  // console.log('user:', user)
 
   if (targetRoom && user) {
     if (targetRoom.members.length < targetRoom.max) {
@@ -100,6 +106,8 @@ const addUserToRoom = (roomId: string, userId: string) => {
 const addNewRoom = (id: string) => {
   const numberOfRooms = roomListProxy.length
 
+  // console.log('numberOfRooms: ', numberOfRooms)
+
   const newRoom: RoomItem = {
     id,
     members: [],
@@ -107,9 +115,21 @@ const addNewRoom = (id: string) => {
     name: `MyRoom${numberOfRooms}`,
   }
 
+  // console.log('newRoom: ', newRoom)
+
   roomListProxy.push(newRoom)
+
+  // console.log('roomListProxy after: ', roomListProxy)
 
   return newRoom
 }
 
-export { roomListProxy, users, addUserToRoom, addNewRoom, onRoomChanged, getUserList, setUserToList }
+export {
+  roomListProxy,
+  users,
+  addUserToRoom,
+  addNewRoom,
+  onRoomChanged,
+  getUserList,
+  setUserToList,
+}
