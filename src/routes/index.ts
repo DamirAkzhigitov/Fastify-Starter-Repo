@@ -13,15 +13,21 @@ import CreateError from 'http-errors'
 const userDidNotProvided = CreateError(500, 'User id not set')
 
 async function routes(fastify: FastifyInstance) {
-  onRoomChanged(() => {
+  const wsFunction = () => {
     fastify.websocketServer.clients.forEach((client: any) => {
       if (client.readyState === 1) {
-        client.send(JSON.stringify(roomListProxy))
+        const payload = JSON.stringify([
+          { type: 'rooms', value: roomListProxy },
+        ])
+
+        client.send(payload)
       }
     })
-    console.log('onRoomChanged')
+    // console.log('onRoomChanged')
     // connection.socket.send()
-  })
+  }
+
+  onRoomChanged(wsFunction)
 
   fastify.get('/', { websocket: true }, () => {
     //
@@ -42,7 +48,11 @@ async function routes(fastify: FastifyInstance) {
   })
 
   fastify.get('/newRoom', (req, reply) => {
+    // console.log('getUniqueID(): ', getUniqueID())
+
     const newRoom = addNewRoom(getUniqueID())
+
+    // console.log('newRoom:', newRoom)
 
     reply.send(newRoom)
   })
@@ -60,8 +70,8 @@ async function routes(fastify: FastifyInstance) {
       return
     }
 
-    console.log('room: ', room)
-    console.log('user id: ', getUserId)
+    // console.log('room: ', room)
+    // console.log('user id: ', getUserId)
     const result = addUserToRoom(room.id, getUserId)
 
     if (result.error) {
