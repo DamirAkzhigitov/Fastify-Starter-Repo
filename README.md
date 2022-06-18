@@ -1,6 +1,12 @@
-# Life Tracks BackEnd
+# Fastify Starter Pack
 
-Мой backend код для игры life-tracks, создано ради познания новых технологий, изучения работы сервера, испрользования СУБД, node.js и другого
+Backend template
+
+- nodemon
+- fastify
+- typescript
+- eslint
+- prettier
 
 ## Development
 
